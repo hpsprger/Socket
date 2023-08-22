@@ -15,7 +15,9 @@
 #include "config.h"
 
 //声明套接字
-int listenfd, connfd;
+int listenfd = -1;
+int connfd = -1;
+int connfd_new = -1;
 
 #define DATA_MAX_LEN 4096 
 #define MAX_LINE 1024
@@ -66,7 +68,7 @@ void *server_entry()
 {
 	socklen_t clilen;
 	pthread_t recv_tid;
-
+	struct timeval timeout;
 	struct sockaddr_in servaddr , cliaddr;
 	
 	if((listenfd = socket(AF_INET , SOCK_STREAM , 0)) == -1)
@@ -94,10 +96,25 @@ void *server_entry()
 
 	while (1) {
 		clilen = sizeof(cliaddr);
-		if((connfd = accept(listenfd , (struct sockaddr *)&cliaddr , &clilen)) < 0)
+
+		if((connfd_new = accept(listenfd , (struct sockaddr *)&cliaddr , &clilen)) < 0)
 		{
 			perror("accept error.\n");
 			exit(1);
+		}
+		if (connfd != -1) {
+			close(connfd);
+		}
+		connfd = connfd_new;
+		timeout.tv_sec = 2;
+		timeout.tv_usec = 0;
+		if (setsockopt(connfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) == -1) 
+		{
+			printf("setsockopt:%08x  SO_RCVTIMEO error\n", connfd);						
+		}
+		if (setsockopt(connfd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)) == -1) 
+		{
+			printf("setsockopt:%08x  SO_SNDTIMEO error\n", connfd);						
 		}
 		printf("server: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
 	}

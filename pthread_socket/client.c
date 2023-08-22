@@ -65,6 +65,7 @@ void *client_entry()
     struct sockaddr_in servaddr;
 	struct tcp_info info; 
 	int len=sizeof(info);
+	struct timeval timeout;
 
 	while (1) {
 		if((sockfd = socket(AF_INET , SOCK_STREAM , 0)) == -1)
@@ -91,12 +92,24 @@ void *client_entry()
 			continue;
 		}
 
+		timeout.tv_sec = 2;
+		timeout.tv_usec = 0;
+		if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) == -1) 
+		{
+			printf("setsockopt:%08x  SO_RCVTIMEO error\n", sockfd);						
+		}
+		if (setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)) == -1) 
+		{
+			printf("setsockopt:%08x  SO_SNDTIMEO error\n", sockfd);						
+		}
+
 		while (1) {
 			getsockopt(sockfd, IPPROTO_TCP, TCP_INFO, &info, (socklen_t *)&len);
 			if (info.tcpi_state == TCP_ESTABLISHED) {
 				sleep(1);
 				continue;
 			} else {
+				close(sockfd);
 				break;
 			}
 		}
