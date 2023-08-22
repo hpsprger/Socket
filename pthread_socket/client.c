@@ -87,6 +87,7 @@ void *client_entry()
 		{
 			perror("connect error");
 			close(sockfd);
+			sleep(1);
 			continue;
 		}
 
