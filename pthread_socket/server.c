@@ -4,7 +4,32 @@
 
 #include "config.h"
 
+//声明套接字
+int listenfd, connfd;
+
 /*处理接收客户端消息函数*/
+void *send_message(void)
+{
+	char msg[MAX_LINE];
+	memset(msg , 0 , MAX_LINE);
+	if (fgets(msg , MAX_LINE , stdin) != NULL) {
+		if(strcmp(msg , "exit\n") == 0)
+		{
+			printf("byebye.\n");
+			memset(msg , 0 , MAX_LINE);
+			strcpy(msg , "byebye.");
+			send(connfd , msg , strlen(msg) , 0);
+			close(connfd);
+			exit(0);
+		}
+		if(send(connfd , msg , strlen(msg) , 0) == -1)
+		{
+			perror("send error.\n");
+			exit(1);
+		}
+	}
+}
+
 void *recv_message(void *fd)
 {
 	int sockfd = *(int *)fd;
@@ -31,14 +56,11 @@ void *recv_message(void *fd)
 	}//while
 }
 
-int main()
+void *server_entry()
 {
-
-	//声明套接字
-	int listenfd , connfd;
 	socklen_t clilen;
 	//声明线程ID
-	pthread_t recv_tid , send_tid;
+	pthread_t recv_tid;
 
 	//定义地址结构
 	struct sockaddr_in servaddr , cliaddr;
@@ -71,44 +93,53 @@ int main()
 	}//if
 
 	/*(5) 接受客户请求，并创建线程处理*/
+	while (1) {
+		clilen = sizeof(cliaddr);
+		if((connfd = accept(listenfd , (struct sockaddr *)&cliaddr , &clilen)) < 0)
+		{
+			perror("accept error.\n");
+			exit(1);
+		}//if
+		printf("server: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
+		/*创建子线程处理该客户链接接收消息*/
+		if(pthread_create(&recv_tid , NULL , recv_message, &connfd) == -1)
+		{
+			perror("pthread create error.\n");
+			exit(1);
+		}//if
+	}
+}
 
-	clilen = sizeof(cliaddr);
-	if((connfd = accept(listenfd , (struct sockaddr *)&cliaddr , &clilen)) < 0)
-	{
-		perror("accept error.\n");
-		exit(1);
-	}//if
+int main()
+{
+	char msg[MAX_LINE];
+	pthread_t recv_tid;
 
-	printf("server: got connection from %s\n", inet_ntoa(cliaddr.sin_addr));
+	printf("socket server main...\n");
 
 	/*创建子线程处理该客户链接接收消息*/
-	if(pthread_create(&recv_tid , NULL , recv_message, &connfd) == -1)
+	if(pthread_create(&recv_tid , NULL , server_entry, 0) == -1)
 	{
 		perror("pthread create error.\n");
 		exit(1);
 	}//if
 
-	/*处理服务器发送消息*/
-	char msg[MAX_LINE];
-	memset(msg , 0 , MAX_LINE);
-	while(fgets(msg , MAX_LINE , stdin) != NULL)	
-	{	
-		if(strcmp(msg , "exit\n") == 0)
-		{
-			printf("byebye.\n");
-			memset(msg , 0 , MAX_LINE);
-			strcpy(msg , "byebye.");
-			send(connfd , msg , strlen(msg) , 0);
-			close(connfd);
-			exit(0);
-		}//if
-
-		if(send(connfd , msg , strlen(msg) , 0) == -1)
-		{
-			perror("send error.\n");
-			exit(1);
-		}//if		
-	}//while
+	while (1) {
+		printf("pls choose:");
+		memset(msg , 0 , MAX_LINE);
+		if ((fgets(msg , MAX_LINE , stdin)) != NULL) {
+			if(strcmp(msg , "send\n") == 0)
+			{
+				printf("pls input send msg:");
+				send_message();
+			}
+			if(strcmp(msg , "exit\n") == 0)
+			{
+				printf("Client closed.\n");
+				close(listenfd);
+				exit(1);
+			}
+		}
+	}
+	return 0;
 }
-
-
