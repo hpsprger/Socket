@@ -37,6 +37,8 @@ void *send_message(void)
 		{
 			perror("send error.\n");
 			return;
+		} else {
+			printf("send %d bytes ok!\n", tx_msg.len);
 		}
 	}
 }
