@@ -76,6 +76,11 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 	rx_msg.msg_control = msg_ctrl_buf;
 	rx_msg.msg_controllen = sizeof(msg_ctrl_buf);
 
+	cmsg = CMSG_FIRSTHDR(&rx_msg);
+	cmsg->cmsg_level = SOL_SOCKET;
+	cmsg->cmsg_type = SCM_RIGHTS;
+	cmsg->cmsg_len = CMSG_LEN(sizeof(unsigned short) + sizeof(unsigned short));
+
 	if (timeout == 0) {
 		flag = MSG_DONTWAIT;
 	} else {
@@ -93,7 +98,6 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 		return -1;
 	}
 
-	cmsg = CMSG_FIRSTHDR(&rx_msg);
 	pmsg->type = ((super_msg *)CMSG_DATA(cmsg))->type;
 	pmsg->len = ((super_msg *)CMSG_DATA(cmsg))->len;
 	return ret;
