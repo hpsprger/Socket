@@ -47,29 +47,29 @@ void *send_message(void)
 	}
 }
 
+char *rx_buffer[DATA_MAX_LEN];
 void *recv_message(void)
 {
-	msg rcv_msg;
-	memset(&rcv_msg, 0, sizeof(rcv_msg));
+	memset(&rx_buffer, 0, sizeof(rx_buffer));
 	int n;
 	int cur_len;
 	int idx = 0;
-	msg *pmsg;
-	if((n = recv(connfd, &rcv_msg, DATA_MAX_LEN, 0)) == -1)
+	char *cur_pos; 
+	if((n = recv(connfd, rx_buffer, DATA_MAX_LEN, 0)) == -1)
 	{
 		perror("recv error.\n");
 		return;
 	}
-	cur_len = n;
-	pmsg = &rcv_msg;
 	printf("\nrecv total len:%d\n", n);
-	while (cur_len >= pmsg->len) {
+	cur_len = n;
+	cur_pos = &rx_buffer;
+	while (cur_len) {
 		printf("msg_idx:%d\n", idx++);
-		printf("recv: rcv_msg.type=%d\n", pmsg->type);
-		printf("recv: rcv_msg.len=%d\n",  pmsg->len);
-		printf("recv: rcv_msg.data=%s\n", pmsg->data);
-		cur_len -= pmsg->len;
-		pmsg = (unsigned char *)pmsg + pmsg->len + 4;
+		printf("recv: rcv_msg.type=%d\n", ((msg *)cur_pos)->type);
+		printf("recv: rcv_msg.len=%d\n",  ((msg *)cur_pos)->len);
+		printf("recv: rcv_msg.data=%s\n", ((msg *)cur_pos)->data);
+		cur_len -= ((msg *)cur_pos)->len;
+		cur_pos = cur_pos + ((msg *)cur_pos)->len;
 	}
 }
 
