@@ -94,9 +94,12 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 		}
 	}
 
+	pmsg->type = 0;
+	pmsg->len = 0;
+
 	ret = recvmsg(sockfd, &rx_msg, flag);
 	if(ret < 0) {
-		perror("send error.\n");
+		perror("recv error.\n");
 		return -1;
 	}
 
@@ -200,6 +203,7 @@ int main(int argc , char **argv)
 			}
 			if(strcmp(choose , "2\n") == 0)
 			{
+				memset(rcv_text , 0 , DATA_MAX_LEN);
 				rx_msg.buffer = rcv_text;
 				ret = recv_message(&rx_msg, DATA_MAX_LEN, 1000);
 				printf("recv total len:%d \n", ret);
