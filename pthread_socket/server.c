@@ -44,7 +44,7 @@ int send_message(super_msg *pmsg)
 	io.iov_len = pmsg->len;
 
 	tx_msg.msg_iov = &io;
-	tx_msg.msg_iovlen = 2;
+	tx_msg.msg_iovlen = 1;
 	tx_msg.msg_control = msg_ctrl_buf;
 	tx_msg.msg_controllen = sizeof(msg_ctrl_buf);
 
@@ -77,6 +77,8 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 	io.iov_base = pmsg->buffer;
 	io.iov_len = rx_len_max;
 
+	rx_msg.msg_iov = &io;
+	rx_msg.msg_iovlen = 1;
 	rx_msg.msg_control = msg_ctrl_buf;
 	rx_msg.msg_controllen = sizeof(msg_ctrl_buf);
 
@@ -202,11 +204,12 @@ int main()
 			}
 			if(strcmp(choose , "2\n") == 0)
 			{
+				rx_msg.buffer = rcv_text;
 				ret = recv_message(&rx_msg, DATA_MAX_LEN, 1000);
 				printf("recv total len:%d \n", ret);
 				printf("rx msg:type(0x%x) \n", rx_msg.type);
 				printf("rx msg:len(%d) \n", rx_msg.len);
-				printf("rx msg:buffer(%s) \n", rx_msg.buffer);
+				printf("rx msg:buffer==>%s\n", rx_msg.buffer);
 			}
 			if(strcmp(choose , "3\n") == 0)
 			{
