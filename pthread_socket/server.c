@@ -44,8 +44,8 @@ int send_message(super_msg *pmsg)
 		return -1;
 	}
 
-	cmsg.len = pmsg->type;
-	cmsg.type = pmsg->len;
+	cmsg.len = pmsg->len;
+	cmsg.type = pmsg->type;
 
 	io[0].iov_base = &cmsg;
 	io[0].iov_len = sizeof(cmsg);
