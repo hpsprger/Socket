@@ -33,7 +33,8 @@ int send_message(super_msg *pmsg)
 {
 	struct msghdr tx_msg = {0};
 	struct iovec io = {0};
-	char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned short) + sizeof(unsigned short))];
+	char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned int))];
+	//char msg_ctrl_buf[100];
 	struct cmsghdr *cmsg;
 
 	if (pmsg == NULL) {
@@ -43,18 +44,24 @@ int send_message(super_msg *pmsg)
 	io.iov_base = pmsg->buffer;
 	io.iov_len = pmsg->len;
 
+	memset(msg_ctrl_buf , 0 , sizeof(msg_ctrl_buf));
+
 	tx_msg.msg_iov = &io;
 	tx_msg.msg_iovlen = 1;
 	tx_msg.msg_control = msg_ctrl_buf;
 	tx_msg.msg_controllen = sizeof(msg_ctrl_buf);
+	//tx_msg.msg_controllen = 100;
 
 	cmsg = CMSG_FIRSTHDR(&tx_msg);
 	cmsg->cmsg_level = SOL_SOCKET;
-	cmsg->cmsg_type = SCM_RIGHTS;	
-	cmsg->cmsg_len = CMSG_LEN(sizeof(unsigned short) + sizeof(unsigned short));
+	cmsg->cmsg_type = SCM_RIGHTS;
+	cmsg->cmsg_len = CMSG_LEN(sizeof(unsigned int));
 
-	((super_msg *)CMSG_DATA(cmsg))->type = pmsg->type;
-	((super_msg *)CMSG_DATA(cmsg))->len = pmsg->len;
+	*(unsigned int *)CMSG_DATA(cmsg) = 0x112233;
+	//((super_msg *)CMSG_DATA(cmsg))->type = pmsg->type;
+	//((super_msg *)CMSG_DATA(cmsg))->len = pmsg->len;
+
+	//((super_msg *)CMSG_DATA(cmsg))->type = pmsg->type;
 
 	if(sendmsg(connfd, &tx_msg, 0) < 0) {
 		perror("send error.\n");
@@ -70,22 +77,20 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 	int flag;
 	struct msghdr rx_msg = {0};
 	struct iovec io = {0};
-	char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned short) + sizeof(unsigned short))];
+	char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned int))];
 	struct cmsghdr *cmsg;
 	struct timeval time;
+	char test_char[6];
 
 	io.iov_base = pmsg->buffer;
 	io.iov_len = rx_len_max;
+
+	memset(msg_ctrl_buf , 0 , sizeof(msg_ctrl_buf));
 
 	rx_msg.msg_iov = &io;
 	rx_msg.msg_iovlen = 1;
 	rx_msg.msg_control = msg_ctrl_buf;
 	rx_msg.msg_controllen = sizeof(msg_ctrl_buf);
-
-	cmsg = CMSG_FIRSTHDR(&rx_msg);
-	cmsg->cmsg_level = SOL_SOCKET;
-	cmsg->cmsg_type = SCM_RIGHTS;
-	cmsg->cmsg_len = CMSG_LEN(sizeof(unsigned short) + sizeof(unsigned short));
 
 	if (timeout == 0) {
 		flag = MSG_DONTWAIT;
@@ -97,7 +102,7 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 			printf("recv_message setsockopt:%08x  SO_RCVTIMEO error\n", connfd);						
 		}
 	}
-	
+
 	pmsg->type = 0;
 	pmsg->len = 0;
 
@@ -107,8 +112,10 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 		return -1;
 	}
 
+	cmsg = CMSG_FIRSTHDR(&rx_msg);
 	pmsg->type = ((super_msg *)CMSG_DATA(cmsg))->type;
 	pmsg->len = ((super_msg *)CMSG_DATA(cmsg))->len;
+
 	return ret;
 }
 

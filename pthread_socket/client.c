@@ -39,6 +39,8 @@ int send_message(super_msg *pmsg)
 	io.iov_base = pmsg->buffer;
 	io.iov_len = pmsg->len;
 
+	memset(msg_ctrl_buf , 0 , sizeof(msg_ctrl_buf));
+
 	tx_msg.msg_iov = &io;
 	tx_msg.msg_iovlen = 1;
 	tx_msg.msg_control = msg_ctrl_buf;
@@ -66,22 +68,27 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 	int flag;
 	struct msghdr rx_msg = {0};
 	struct iovec io = {0};
-	char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned short) + sizeof(unsigned short))];
+	char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned int))];
+	//char msg_ctrl_buf[CMSG_SPACE(sizeof(unsigned short) + sizeof(unsigned short))];
+	//char msg_ctrl_buf[100];
 	struct cmsghdr *cmsg;
 	struct timeval time;
-
+	unsigned int test;
 	io.iov_base = pmsg->buffer;
 	io.iov_len = rx_len_max;
+
+	memset(msg_ctrl_buf , 0 , sizeof(msg_ctrl_buf));
 
 	rx_msg.msg_iov = &io;
 	rx_msg.msg_iovlen = 1;
 	rx_msg.msg_control = msg_ctrl_buf;
 	rx_msg.msg_controllen = sizeof(msg_ctrl_buf);
+	//rx_msg.msg_controllen = 100;
 
 	cmsg = CMSG_FIRSTHDR(&rx_msg);
 	cmsg->cmsg_level = SOL_SOCKET;
 	cmsg->cmsg_type = SCM_RIGHTS;
-	cmsg->cmsg_len = CMSG_LEN(sizeof(unsigned short) + sizeof(unsigned short));
+	cmsg->cmsg_len = CMSG_LEN(sizeof(unsigned int));
 
 	if (timeout == 0) {
 		flag = MSG_DONTWAIT;
@@ -103,8 +110,11 @@ int recv_message(super_msg *pmsg, unsigned int rx_len_max, unsigned int timeout)
 		return -1;
 	}
 
-	pmsg->type = ((super_msg *)CMSG_DATA(cmsg))->type;
-	pmsg->len = ((super_msg *)CMSG_DATA(cmsg))->len;
+	cmsg = CMSG_FIRSTHDR(&rx_msg);
+	test = *(unsigned int *)CMSG_DATA(cmsg);
+	//pmsg->type = ((super_msg *)CMSG_DATA(cmsg))->type;
+	//pmsg->len = ((super_msg *)CMSG_DATA(cmsg))->len;
+
 	return ret;
 }
 
