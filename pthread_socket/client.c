@@ -15,7 +15,7 @@
 
 int connfd;
 
-#define DATA_MAX_LEN 4096 
+#define DATA_MAX_LEN 20 
 #define CHOOSE_MAX_LINE 50
 
 typedef struct _super_msg {
@@ -113,6 +113,8 @@ int recv_message(super_msg *pmsg, unsigned int timeout)
 	return ret;
 }
 
+unsigned int link_status = 0;
+
 void *client_entry()
 {
     struct sockaddr_in servaddr;
@@ -121,6 +123,7 @@ void *client_entry()
 	struct timeval timeout;
 
 	while (1) {
+		link_status = 0;
 		if((connfd = socket(AF_INET , SOCK_STREAM , 0)) == -1)
 		{
 			perror("socket error");
@@ -157,19 +160,147 @@ void *client_entry()
 		{
 			printf("setsockopt:%08x  SO_SNDTIMEO error\n", connfd);						
 		}
-
+		link_status = 1;
 		while (1) {
 			getsockopt(connfd, IPPROTO_TCP, TCP_INFO, &info, (socklen_t *)&len);
 			if (info.tcpi_state == TCP_ESTABLISHED) {
 				sleep(1);
 				continue;
 			} else {
+				link_status = 0;
 				close(connfd);
 				break;
 			}
 		}
 	}
 }
+
+char rcv_buf[DATA_MAX_LEN];
+
+#define STATUS_0 0x010
+#define STATUS_1 0x001
+#define STATUS_2 0x002
+#define STATUS_3 0x003
+#define STATUS_4 0x004
+#define STATUS_5 0x005
+#define STATUS_DO_WORKING 0x006
+
+void * fsm_translation()
+{
+	int ret;
+	unsigned int delay;
+	int err_count;
+	super_msg tx_msg = {0};
+	super_msg rx_msg = {0};	
+	unsigned int fsm = STATUS_0;
+	
+	printf(" =========fsm_translation======= \n");
+
+	while (1) {
+		switch(fsm) {
+		case STATUS_0:
+		if (link_status == 1) {
+			printf("fsm STATUS_0 =========pass======= \n");
+			fsm = STATUS_1;
+		}
+		err_count = 0;
+		break;
+		case STATUS_1:
+		tx_msg.type = STATUS_1;
+		tx_msg.len = strlen("STATUS_1");
+		tx_msg.buffer = "STATUS_1";
+		ret = send_message(&tx_msg);
+		if (ret < 0) {
+			printf("fsm send_message err\n");
+			err_count++;
+			break;
+		}
+
+		rx_msg.len = DATA_MAX_LEN;
+		rx_msg.buffer = rcv_buf;
+		ret = recv_message(&rx_msg, 1000);
+		if (ret < 0) {
+			printf("fsm recv_message err\n");
+			break;
+		}
+
+		if (rx_msg.type == STATUS_1) {
+			printf("fsm STATUS_1 =========pass=======\n");
+			fsm = STATUS_2;
+		} else {
+			err_count++;
+		}
+		break;
+		case STATUS_2:
+		tx_msg.type = STATUS_2;
+		tx_msg.len = strlen("STATUS_2");
+		tx_msg.buffer = "STATUS_2";
+		ret = send_message(&tx_msg);
+		if (ret < 0) {
+			printf("fsm send_message err\n");
+			err_count++;
+			break;
+		}
+
+		rx_msg.len = DATA_MAX_LEN;
+		rx_msg.buffer = rcv_buf;
+		ret = recv_message(&rx_msg, 1000);
+		if (ret < 0) {
+			printf("fsm recv_message err\n");
+			break;
+		}
+
+		if (rx_msg.type == STATUS_2) {
+			printf("fsm STATUS_2 =========pass======= \n");
+			fsm = STATUS_3;
+		} else {
+			err_count++;
+		}
+		break;
+		case STATUS_3:
+		tx_msg.type = STATUS_3;
+		tx_msg.len = strlen("STATUS_3");
+		tx_msg.buffer = "STATUS_3";
+		ret = send_message(&tx_msg);
+		if (ret < 0) {
+			printf("fsm send_message err\n");
+			err_count++;
+			break;
+		}
+
+		rx_msg.len = DATA_MAX_LEN;
+		rx_msg.buffer = rcv_buf;
+		ret = recv_message(&rx_msg, 1000);
+		if (ret < 0) {
+			printf("fsm recv_message err\n");
+			break;
+		}
+
+		if (rx_msg.type == STATUS_3) {
+			printf("fsm STATUS_3 =========pass======= \n");
+			fsm = STATUS_DO_WORKING;
+		} else {
+			err_count++;
+		}
+		break;
+		case STATUS_DO_WORKING:
+		srand( (unsigned)time(NULL));
+		delay = rand()%20;
+		printf("fsm STATUS_DO_WORKING ========delay=%d======== \n", delay);
+		sleep(delay);
+		fsm = STATUS_0;
+		break;
+		default:
+		break;
+		}
+		if (err_count > 5) {
+			fsm = STATUS_0;
+		}
+		sleep(1);
+	}
+}
+
+
 
 char send_text[DATA_MAX_LEN];
 char rcv_text[DATA_MAX_LEN];
@@ -183,6 +314,12 @@ int main(int argc , char **argv)
 	int ret;
 
 	if(pthread_create(&tid , NULL , client_entry, 0) == -1)
+	{
+		perror("pthread create error.\n");
+		exit(1);
+	}
+
+	if(pthread_create(&tid , NULL , fsm_translation, 0) == -1)
 	{
 		perror("pthread create error.\n");
 		exit(1);
