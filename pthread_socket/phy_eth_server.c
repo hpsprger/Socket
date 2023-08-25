@@ -38,7 +38,7 @@ int server_get_socket_info(unsigned int type, void *info)
 	}
 
 	if (type == SYNC_LINK_INFO_STATUS) {
-		return 	GET_ENTRY(server_dev.conn_fd, socket_device, conn_fd)->link_status;
+		return 	GET_ENTRY(&server_dev.conn_fd, socket_device, conn_fd)->link_status;
 	}
 
 	return 0;
