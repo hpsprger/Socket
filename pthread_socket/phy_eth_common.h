@@ -17,6 +17,8 @@
 
 #define SERVER_LISTEN_MAX 6000
 
+#define RX_TIMEOUT 1000
+
 #define LINK_FSM_USLEEP 1000000
 
 typedef struct _msg_head {
@@ -37,15 +39,17 @@ typedef struct _socket_device {
 
 typedef struct _device_ops {
 	void (*init)(void);
-	int  (*send)(unsigned int type, void *info);
-	int  (*recv)(unsigned int type, void *info);
+	int  (*send)(link_msg *pmsg);
+	int  (*recv)(link_msg *pmsg, unsigned int timeout);
 	int  (*get)(unsigned int type, void *info);
 	int  (*set)(unsigned int type, void *info);
-	int  (*close)(unsigned int type, void *info);
+	int  (*close)(void);
 } socket_device_ops;
 
 #define GET_ENTRY(ptr, type, member) \
     ((type *)( (char *)(ptr) - (unsigned long)(&((type*)0)->member)))
+
+#define DATA_COMM_STR "DATA_COMM"
 
 enum LINK_FSM {
 	SYNC_LINK_SETUP = 0,

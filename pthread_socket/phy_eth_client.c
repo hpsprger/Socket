@@ -32,12 +32,12 @@ void client_close(void)
 
 int client_get_socket_info(unsigned int type, void *info)
 {
-	if (sockfd == NULL) {
+	if (info == NULL) {
 		return -1;
 	}
 
 	if (type == SYNC_LINK_INFO_STATUS) {
-		return 	GET_ENTRY(client_dev.conn_fd, socket_device, conn_fd)->link_status;
+		return 	*((unsigned int *)info) = GET_ENTRY(client_dev.conn_fd, socket_device, conn_fd)->link_status;
 	}
 
 	return 0;
