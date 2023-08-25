@@ -38,6 +38,24 @@ int data_trans_send_single_msg(unsigned int msg_type)
 	return ret;
 }
 
+int data_trans_send_msg(link_msg *pmsg)
+{
+	int ret;
+	if (pmsg == NULL) {
+		return -1;
+	}
+	ret = data_trans_ops->send(pmsg);
+	return ret;
+}
+
+void data_trans_close(void)
+{
+	int ret;
+	ret = data_trans_ops->close();
+	return ret;
+}
+
+
 int data_trans_recv_single_msg(link_msg *pmsg, unsigned int timeout)
 {
 	int ret;

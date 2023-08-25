@@ -1,4 +1,4 @@
-#include "common.h"
+#include "data_trans.h"
 
 char send_text[DATA_MAX_LEN];
 char rcv_text[DATA_MAX_LEN];
@@ -7,11 +7,10 @@ char rcv_text[DATA_MAX_LEN];
 // ./main 1 ==> client
 void main(int argc, char* argv[])
 {
-{
 	char choose[CHOOSE_MAX_LINE];
 	pthread_t tid;
-	super_msg tx_msg = {0};
-	super_msg rx_msg = {0};	
+	link_msg tx_msg = {0};
+	link_msg rx_msg = {0};	
 	int ret;
 
     if(argc < 2)
@@ -33,10 +32,10 @@ void main(int argc, char* argv[])
 				printf("input msg: \n");
 				memset(send_text , 0 , DATA_MAX_LEN);
 				fgets(send_text , DATA_MAX_LEN , stdin);
-				tx_msg.type = 0x1234;
-				tx_msg.len = strlen(send_text);
-				tx_msg.buffer = send_text;
-				if (send_message(&tx_msg) < 0) {
+				tx_msg.head.type = 0x1234;
+				tx_msg.head.len = strlen(send_text);
+				tx_msg.payload = send_text;
+				if (data_trans_send_msg(&tx_msg) < 0) {
 					printf("send_message fail \n");
 				} else {
 					printf("send_message ok \n");
@@ -46,18 +45,16 @@ void main(int argc, char* argv[])
 			{
 				memset(rcv_text , 0 , DATA_MAX_LEN);
 				rx_msg.buffer = rcv_text;
-				rx_msg.len = DATA_MAX_LEN;
-				ret = recv_message(&rx_msg, 1000);
-				printf("recv total len:%d \n", ret);
-				printf("rx msg:type(0x%x) \n", rx_msg.type);
-				printf("rx msg:len(%d) \n", rx_msg.len);
-				printf("rx msg:buffer==>%s\n", rx_msg.buffer);
+				ret = data_trans_recv_single_msg(&rx_msg, 1000);
+				printf("recv:%s \n", (ret == 0)?"ok":"fail");
+				printf("rx msg:type(0x%x) \n", rx_msg.head.type);
+				printf("rx msg:len(%d) \n", rx_msg.head.len);
+				printf("rx msg:buffer==>%s\n", rx_msg.payload);
 			}
 			if(strcmp(choose , "3\n") == 0)
 			{
-				printf("Client closed.\n");
-				close(connfd);
-				close(listenfd);
+				printf("data_trans_close...\n");
+				data_trans_close();
 				exit(1);
 			}
 		}
