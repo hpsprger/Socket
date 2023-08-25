@@ -1,5 +1,5 @@
-#ifndef __COMMON_H
-#define __COMMON_H
+#ifndef __DATA_TRANS_H__
+#define __DATA_TRANS_H__
 
 #include "phy_eth_common.h"
 

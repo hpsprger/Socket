@@ -2,6 +2,12 @@
 
 socket_device server_dev = {0};
 
+void server_init(void);
+int server_send_single_message(link_msg *pmsg);
+int server_recv_single_message(link_msg *pmsg, unsigned int timeout);
+int server_get_socket_info(unsigned int type, void *info);
+void server_close(void);
+
 socket_device_ops eth_server_dev_ops = {
 	.init = server_init,
 	.send = server_send_single_message,
@@ -18,7 +24,7 @@ int server_send_single_message(link_msg *pmsg)
 	return ret;
 }
 
-int server_recv_single_message(link_msg *pmsg, timeout)
+int server_recv_single_message(link_msg *pmsg, unsigned int timeout)
 {
 	int ret;
 	ret = recv_single_message(server_dev.conn_fd, pmsg, timeout);
@@ -27,7 +33,7 @@ int server_recv_single_message(link_msg *pmsg, timeout)
 
 int server_get_socket_info(unsigned int type, void *info)
 {
-	if (sockfd == NULL) {
+	if (info == NULL) {
 		return -1;
 	}
 

@@ -19,10 +19,10 @@ int send_single_message(int sockfd, link_msg *pmsg)
 	io[1].iov_base = pmsg->payload;
 	io[1].iov_len = pmsg->head.len;
 
-	tx_msg.msg_iov = &io[0];
-	tx_msg.msg_iovlen = 2;
-	tx_msg.msg_control = 0;
-	tx_msg.msg_controllen = 0;
+	msg.msg_iov = &io[0];
+	msg.msg_iovlen = 2;
+	msg.msg_control = 0;
+	msg.msg_controllen = 0;
 
 	if(sendmsg(sockfd, &msg, 0) < 0) {
 		perror("send error.\n");
@@ -58,7 +58,7 @@ int recv_single_message(int sockfd, link_msg *pmsg, unsigned int timeout)
 		time.tv_sec = 0;
 		time.tv_usec = timeout;
 		if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char*)&time, sizeof(time)) == -1) {
-			perror("recv_message setsockopt:%08x  SO_RCVTIMEO error\n", connfd);			
+			perror("recv_message setsockopt:%08x  SO_RCVTIMEO error\n", sockfd);			
 		}
 	}
 

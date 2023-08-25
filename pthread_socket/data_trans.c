@@ -1,17 +1,11 @@
-#include "common.h"
+#include "data_trans.h"
 
-int listenfd = -1;
-int connfd = -1;
-int connfd_new = -1;
-unsigned int link_status = 0;
+extern socket_device_ops eth_server_dev_ops;
+extern socket_device_ops eth_client_dev_ops;
 
-char rcv_buf[DATA_MAX_LEN];
-char send_text[DATA_MAX_LEN];
-char rcv_text[DATA_MAX_LEN];
-
-socket_device_ops data_trans_dev_ops[] = {
-	eth_server_dev_ops,
-	eth_client_dev_ops,
+socket_device_ops *data_trans_dev_ops[] = {
+	&eth_server_dev_ops,
+	&eth_client_dev_ops,
 	//
 };
 
@@ -115,7 +109,7 @@ void * sync_fsm_translation()
 			break;
 		}
 
-		if (msg.type == SYNC_MSG_START) {
+		if (msg.head.type == SYNC_MSG_START) {
 			printf("SYNC_LINK_START_RX =========2======= pass \n");
 			link_fsm = SYNC_LINK_HIGH_TX;
 			err_count = 0;
@@ -146,7 +140,7 @@ void * sync_fsm_translation()
 			break;
 		}
 
-		if (msg.type == SYNC_MSG_HIGH) {
+		if (msg.head.type == SYNC_MSG_HIGH) {
 			printf("SYNC_LINK_HIGH_RX =========4======= pass \n");
 			link_fsm = SYNC_LINK_LOW_TX;
 			err_count = 0;
@@ -178,7 +172,7 @@ void * sync_fsm_translation()
 			break;
 		}
 
-		if (msg.type == SYNC_MSG_LOW) {
+		if (msg.head.type == SYNC_MSG_LOW) {
 			printf("SYNC_LINK_LOW_RX =========6======= pass \n");
 			link_fsm = SYNC_MSG_TASKING;
 			err_count = 0;
@@ -210,7 +204,7 @@ void * sync_fsm_translation()
 		break;
 		}
 		if (err_count > 5) {
-			fsm = STATUS_0;
+			link_fsm = SYNC_LINK_STOP;
 		}
 		usleep(LINK_FSM_USLEEP);
 	}
@@ -218,6 +212,8 @@ void * sync_fsm_translation()
 
 int data_trans_init(unsigned int type)
 {
+	int tid;
+	
 	if (type > DEVICE_TYPE_MAX) {
 		return -1;
 	}

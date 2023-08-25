@@ -1,5 +1,5 @@
-#ifndef __COMMON_H
-#define __COMMON_H
+#ifndef __PHY_ETH_COMMON_H__
+#define __PHY_ETH_COMMON_H__
 
 #include <sys/socket.h>
 #include <string.h>
@@ -76,7 +76,7 @@ enum MSG_TYPE {
 enum LINK_STATUS {
 	SYNC_LINK_CONNECTED = 0,
 	SYNC_LINK_DISCONNECTED,
-	SYNC_LINK_MAX,
+	SYNC_LINK_STATUS_MAX,
 };
 
 enum LINK_INFO {

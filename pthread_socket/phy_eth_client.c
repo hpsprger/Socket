@@ -1,6 +1,12 @@
-#include "client.h"
+#include "phy_eth_client.h"
 
 socket_device client_dev = {0};
+
+void client_init(void);
+int client_send_single_message(link_msg *pmsg);
+int client_recv_single_message(link_msg *pmsg, unsigned int timeout);
+int client_get_socket_info(unsigned int type, void *info);
+void client_close(void);
 
 socket_device_ops eth_client_dev_ops = {
 	.init = client_init,
@@ -18,7 +24,7 @@ int client_send_single_message(link_msg *pmsg)
 	return ret;
 }
 
-int client_recv_single_message(link_msg *pmsg, timeout)
+int client_recv_single_message(link_msg *pmsg, unsigned int timeout)
 {
 	int ret;
 	ret = recv_single_message(client_dev.conn_fd, pmsg, timeout);

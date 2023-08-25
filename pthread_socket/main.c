@@ -1,7 +1,9 @@
+
+#include <stdio.h>
 #include "data_trans.h"
 
-char send_text[DATA_MAX_LEN];
-char rcv_text[DATA_MAX_LEN];
+char send_text[PAYLOAD_MAX_LEN];
+char rcv_text[PAYLOAD_MAX_LEN];
 
 // ./main 0 ==> server
 // ./main 1 ==> client
@@ -30,8 +32,8 @@ void main(int argc, char* argv[])
 			if(strcmp(choose , "1\n") == 0)
 			{
 				printf("input msg: \n");
-				memset(send_text , 0 , DATA_MAX_LEN);
-				fgets(send_text , DATA_MAX_LEN , stdin);
+				memset(send_text , 0 , PAYLOAD_MAX_LEN);
+				fgets(send_text , PAYLOAD_MAX_LEN , stdin);
 				tx_msg.head.type = 0x1234;
 				tx_msg.head.len = strlen(send_text);
 				tx_msg.payload = send_text;
@@ -43,8 +45,8 @@ void main(int argc, char* argv[])
 			}
 			if(strcmp(choose , "2\n") == 0)
 			{
-				memset(rcv_text , 0 , DATA_MAX_LEN);
-				rx_msg.buffer = rcv_text;
+				memset(rcv_text , 0 , PAYLOAD_MAX_LEN);
+				rx_msg.payload = rcv_text;
 				ret = data_trans_recv_single_msg(&rx_msg, 1000);
 				printf("recv:%s \n", (ret == 0)?"ok":"fail");
 				printf("rx msg:type(0x%x) \n", rx_msg.head.type);
