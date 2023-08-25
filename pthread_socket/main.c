@@ -21,7 +21,7 @@ void main(int argc, char* argv[])
         exit(1);
     }
 
-    printf("main --> argv[0]=%d  argv[1]=%d  argc=%d \n", atoi(argv[0]), atoi(argv[1]), argc);
+    printf("main --> argv[0]=%s  argv[1]=%d  argc=%d \n", argv[0], atoi(argv[1]), argc);
 
 	data_trans_init(atoi(argv[1]));
 
