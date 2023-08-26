@@ -9,4 +9,9 @@ enum DEVICE_TYPE {
 	DEVICE_TYPE_MAX,
 };
 
+typedef struct _data_trans_device {
+	int tid;
+	device_ops *ops;
+} data_trans_device;
+
 #endif

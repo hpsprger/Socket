@@ -1,20 +1,20 @@
 #include "data_trans.h"
 
-extern socket_device_ops eth_server_dev_ops;
-extern socket_device_ops eth_client_dev_ops;
+extern device_ops eth_server_dev_ops;
+extern device_ops eth_client_dev_ops;
 
-socket_device_ops *data_trans_dev_ops[] = {
+device_ops *data_trans_dev_ops[] = {
 	&eth_server_dev_ops,
 	&eth_client_dev_ops,
 	//
 };
 
-socket_device_ops *data_trans_ops = 0;
+data_trans_device data_trans;
 
 int get_link_info(unsigned int *link_status)
 {
 	int ret;
-	ret = data_trans_ops->get(SYNC_LINK_INFO_STATUS, link_status);
+	ret = data_trans.ops->get(SYNC_LINK_INFO_STATUS, link_status);
 	return ret;
 }
 
@@ -28,7 +28,7 @@ int data_trans_send_single_msg(unsigned int msg_type)
 	msg.head.type = msg_type;
 	msg.head.len = strlen(DATA_COMM_STR);
 	msg.payload = DATA_COMM_STR;
-	ret = data_trans_ops->send(&msg);
+	ret = data_trans.ops->send(&msg);
 	return ret;
 }
 
@@ -38,14 +38,14 @@ int data_trans_send_msg(link_msg *pmsg)
 	if (pmsg == NULL) {
 		return -1;
 	}
-	ret = data_trans_ops->send(pmsg);
+	ret = data_trans.ops->send(pmsg);
 	return ret;
 }
 
 void data_trans_close(void)
 {
 	int ret;
-	ret = data_trans_ops->close();
+	ret = data_trans.ops->close();
 	return ret;
 }
 
@@ -53,7 +53,7 @@ void data_trans_close(void)
 int data_trans_recv_single_msg(link_msg *pmsg, unsigned int timeout)
 {
 	int ret;
-	ret = data_trans_ops->recv(pmsg, timeout);
+	ret = data_trans.ops->recv(pmsg, timeout);
 	return ret;
 }
 
@@ -63,11 +63,10 @@ void * sync_fsm_translation()
 	unsigned int delay;
 	int err_count;
 	link_msg msg = {0};
-	unsigned char rx_buffer[PAYLOAD_MAX_LEN];
 	unsigned int link_fsm = SYNC_LINK_SETUP;
 	unsigned int link_status = SYNC_LINK_DISCONNECTED;
 	unsigned int task_count;
-
+	unsigned char rx_buffer[PAYLOAD_MAX_LEN];
 	struct timeval time = { 
 			.tv_sec=0, /*单位：s*/
 			.tv_usec=0 /*单位：ns*/
@@ -208,11 +207,11 @@ void * sync_fsm_translation()
 		}
 		usleep(LINK_FSM_USLEEP);
 	}
+
 }
 
 int data_trans_init(unsigned int type)
 {
-	int tid;
 	
 	if (type > DEVICE_TYPE_MAX) {
 		return -1;
@@ -220,12 +219,13 @@ int data_trans_init(unsigned int type)
 
 	srand((unsigned)time(NULL)); //保证随机数的随机性
 
-	data_trans_ops = data_trans_dev_ops[type];
+	data_trans.ops  = data_trans_dev_ops[type];
 
-	if(pthread_create(&tid , NULL , sync_fsm_translation, 0) == -1)
+	if(pthread_create(&data_trans.tid , NULL , sync_fsm_translation, 0) == -1)
 	{
 		perror("pthread create error.\n");
 		return -1;
 	}
+
 	return 0;
 }

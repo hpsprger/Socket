@@ -11,8 +11,8 @@
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 
-#define PAYLOAD_MAX_LEN 50  
-#define CHOOSE_MAX_LINE 50
+#define PAYLOAD_MAX_LEN 4096  
+#define CHOOSE_MAX_LINE 500
 #define CONNECT_PORT 7001
 
 #define SERVER_LISTEN_MAX 6000
@@ -44,7 +44,7 @@ typedef struct _device_ops {
 	int  (*get)(unsigned int type, void *info);
 	int  (*set)(unsigned int type, void *info);
 	int  (*close)(void);
-} socket_device_ops;
+} device_ops;
 
 #define GET_ENTRY(ptr, type, member) \
     ((type *)( (char *)(ptr) - (unsigned long)(&((type*)0)->member)))

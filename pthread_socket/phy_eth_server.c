@@ -8,7 +8,7 @@ int server_recv_single_message(link_msg *pmsg, unsigned int timeout);
 int server_get_socket_info(unsigned int type, void *info);
 void server_close(void);
 
-socket_device_ops eth_server_dev_ops = {
+device_ops eth_server_dev_ops = {
 	.init = server_init,
 	.send = server_send_single_message,
 	.recv = server_recv_single_message,
