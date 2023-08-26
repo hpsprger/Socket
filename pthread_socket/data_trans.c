@@ -213,6 +213,12 @@ void * sync_fsm_translation()
 		break;
 		}
 		if (err_count > 5) {
+			get_link_info(&link_status);
+			data_trans.excep_info.link_status = link_status;
+			data_trans.excep_info.last_fsm = link_fsm;
+			data_trans.excep_info.last_fsm_result = ret;
+			data_trans.excep_info.task_count = task_count;
+			clock_gettime(0, &data_trans.excep_info.time);
 			link_fsm = SYNC_LINK_STOP;
 		}
 		usleep(LINK_FSM_USLEEP);
