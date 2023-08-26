@@ -89,11 +89,11 @@ void * sync_fsm_translation()
 		case SYNC_LINK_START_TX:
 		ret = data_trans_send_single_msg(SYNC_MSG_START);
 		if (ret < 0) {
-			printf("SYNC_LINK_SETUP =========1======= send fail\n");
+			printf("SYNC_LINK_START_TX =========1======= send fail\n");
 			err_count++;
 			break;
 		} else {
-			printf("SYNC_LINK_SETUP =========1======= send ok\n");
+			printf("SYNC_LINK_START_TX =========1======= send ok\n");
 			link_fsm = SYNC_LINK_START_RX;
 			err_count = 0;
 		}
@@ -125,7 +125,7 @@ void * sync_fsm_translation()
 			break;
 		} else {
 			printf("SYNC_LINK_HIGH_TX =========3======= send ok\n");
-			link_fsm = SYNC_LINK_START_RX;
+			link_fsm = SYNC_LINK_HIGH_RX;
 			err_count = 0;
 		}
 		break;
@@ -187,15 +187,15 @@ void * sync_fsm_translation()
 		sec = (unsigned long long int)time.tv_sec;
 		usec = (unsigned long long int)time.tv_usec;
 
-		printf("SYNC_LINK_TASKING ========task_count=%d(time:0x%lld)======== \n", task_count++, sec*1000000 + usec/1000);
+		printf("SYNC_LINK_TASKING ========7==task_count=%d(time:0x%lld)======== \n", task_count++, sec*1000000 + usec/1000);
 		sleep(delay);
-		printf("SYNC_LINK_TASKING ========done======= \n", task_count);
+		printf("SYNC_LINK_TASKING ========7==done======= \n", task_count);
 		link_fsm = SYNC_LINK_START_TX;
 		err_count = 0;
 		break;
 
 		case SYNC_LINK_STOP:
-		printf("SYNC_LINK_STOP ================ \n");
+		printf("SYNC_LINK_STOP ========8======== \n");
 		sleep(1);
 		break;
 
