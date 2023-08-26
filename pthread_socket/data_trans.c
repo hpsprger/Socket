@@ -84,18 +84,18 @@ void * sync_fsm_translation()
 			printf("SYNC_LINK_SETUP =========0======= pass\n");
 			link_fsm = SYNC_LINK_START_TX;
 		} else {
-			printf("SYNC_LINK_SETUP =========0======= SYNC_LINK_DISCONNECTED\n");
+			printf("SYNC_LINK_SETUP =========0======= nopass SYNC_LINK_DISCONNECTED\n");
 		}
 		break;
 
 		case SYNC_LINK_START_TX:
 		ret = data_trans_send_single_msg(SYNC_MSG_START);
 		if (ret < 0) {
-			printf("SYNC_LINK_START_TX =========1======= send fail\n");
+			printf("SYNC_LINK_START_TX =========1======= no pass send fail\n");
 			err_count++;
 			break;
 		} else {
-			printf("SYNC_LINK_START_TX =========1======= send ok\n");
+			printf("SYNC_LINK_START_TX =========1======= pass \n");
 			link_fsm = SYNC_LINK_START_RX;
 			err_count = 0;
 		}
@@ -105,7 +105,7 @@ void * sync_fsm_translation()
 		msg.payload = rx_buffer;
 		ret = data_trans_recv_single_msg(&msg, RX_TIMEOUT);
 		if (ret < 0) {
-			printf("SYNC_LINK_START_RX =========2======= recv fail\n");
+			printf("SYNC_LINK_START_RX =========2======= nopass recv fail\n");
 			err_count++;
 			break;
 		}
@@ -115,6 +115,7 @@ void * sync_fsm_translation()
 			link_fsm = SYNC_LINK_HIGH_TX;
 			err_count = 0;
 		} else {
+			printf("SYNC_LINK_START_RX =========2======= nopass tyoe mis \n");
 			err_count++;
 		}
 		break;
@@ -122,11 +123,11 @@ void * sync_fsm_translation()
 		case SYNC_LINK_HIGH_TX:
 		ret = data_trans_send_single_msg(SYNC_MSG_HIGH);
 		if (ret < 0) {
-			printf("SYNC_LINK_HIGH_TX =========3======= send fail\n");
+			printf("SYNC_LINK_HIGH_TX =========3======= nopass send fail\n");
 			err_count++;
 			break;
 		} else {
-			printf("SYNC_LINK_HIGH_TX =========3======= send ok\n");
+			printf("SYNC_LINK_HIGH_TX =========3======= pass \n");
 			link_fsm = SYNC_LINK_HIGH_RX;
 			err_count = 0;
 		}
@@ -136,7 +137,7 @@ void * sync_fsm_translation()
 		msg.payload = rx_buffer;
 		ret = data_trans_recv_single_msg(&msg, RX_TIMEOUT);
 		if (ret < 0) {
-			printf("SYNC_LINK_HIGH_RX =========4======= recv fail\n");
+			printf("SYNC_LINK_HIGH_RX =========4======= nopass recv fail\n");
 			err_count++;
 			break;
 		}
@@ -146,6 +147,7 @@ void * sync_fsm_translation()
 			link_fsm = SYNC_LINK_LOW_TX;
 			err_count = 0;
 		} else {
+			printf("SYNC_LINK_HIGH_RX =========4======= nopass tyoe mis\n");
 			err_count++;
 		}
 		break;
@@ -154,11 +156,11 @@ void * sync_fsm_translation()
 		case SYNC_LINK_LOW_TX:
 		ret = data_trans_send_single_msg(SYNC_MSG_LOW);
 		if (ret < 0) {
-			printf("SYNC_LINK_LOW_TX =========5======= send fail\n");
+			printf("SYNC_LINK_LOW_TX =========5======= nopass send fail\n");
 			err_count++;
 			break;
 		} else {
-			printf("SYNC_LINK_LOW_TX =========5======= send ok\n");
+			printf("SYNC_LINK_LOW_TX =========5======= pass \n");
 			link_fsm = SYNC_LINK_LOW_RX;
 			err_count = 0;
 		}
@@ -168,7 +170,7 @@ void * sync_fsm_translation()
 		msg.payload = rx_buffer;
 		ret = data_trans_recv_single_msg(&msg, RX_TIMEOUT);
 		if (ret < 0) {
-			printf("SYNC_LINK_LOW_RX =========6======= recv fail\n");
+			printf("SYNC_LINK_LOW_RX =========6======= nopass recv fail\n");
 			err_count++;
 			break;
 		}
@@ -178,6 +180,7 @@ void * sync_fsm_translation()
 			link_fsm = SYNC_MSG_TASKING;
 			err_count = 0;
 		} else {
+			printf("SYNC_LINK_LOW_RX =========6======= nopass tyoe mis\n");
 			err_count++;
 		}
 		break;
