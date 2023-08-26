@@ -177,7 +177,7 @@ void * sync_fsm_translation()
 
 		if (msg.head.type == SYNC_MSG_LOW) {
 			printf("SYNC_LINK_LOW_RX =========6======= pass \n");
-			link_fsm = SYNC_MSG_TASKING;
+			link_fsm = SYNC_LINK_TASKING;
 			err_count = 0;
 		} else {
 			printf("SYNC_LINK_LOW_RX =========6======= nopass tyoe mis\n");
