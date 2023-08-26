@@ -58,6 +58,8 @@ void *server_entry()
 	struct timeval timeout;
 	struct sockaddr_in serv_addr , client_addr;
 	
+	printf("server_entry...\n");
+
 	if((server_dev.listen_fd = socket(AF_INET , SOCK_STREAM , 0)) == -1) {
 		perror("socket error.\n");
 		exit(1);

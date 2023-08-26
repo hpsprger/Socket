@@ -56,6 +56,8 @@ void *client_entry()
 	int len=sizeof(info);
 	struct timeval timeout;
 
+	printf("client_entry...\n");
+
 	while (1) {
 		client_dev.link_status = SYNC_LINK_DISCONNECTED;
 		if((client_dev.conn_fd = socket(AF_INET , SOCK_STREAM , 0)) == -1)
