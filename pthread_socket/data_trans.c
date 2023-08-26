@@ -83,6 +83,8 @@ void * sync_fsm_translation()
 		if (link_status == SYNC_LINK_CONNECTED) {
 			printf("SYNC_LINK_SETUP =========0======= pass\n");
 			link_fsm = SYNC_LINK_START_TX;
+		} else {
+			printf("SYNC_LINK_SETUP =========0======= SYNC_LINK_DISCONNECTED\n");
 		}
 		break;
 
