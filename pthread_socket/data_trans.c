@@ -186,17 +186,22 @@ void * sync_fsm_translation()
 		break;
 
 		case SYNC_LINK_TASKING:
-		delay = rand()%10;
+		delay = rand()%10 * 150;
 
 		clock_gettime(0, &time);
 		sec = (unsigned long long int)time.tv_sec;
 		usec = (unsigned long long int)time.tv_usec;
 		//printf("SYNC_LINK_TASKING =====7===delay:%d====task_count=%d(time:0x%lld)===== \n", delay, task_count++, sec*1000000 + usec/1000);
-		printf("SYNC_LINK_TASKING =====7===delay:%d===task_count=%d==time:sec:%lld--usec:%lld===== \n", delay, task_count++, sec, usec);
-		sleep(delay);
+		printf("SYNC_LINK_TASKING =====7===delay:%dus===task_count=%d==time:sec:%lld--usec:%lld===== \n", delay, task_count++, sec, usec);
+		usleep(delay);
 		printf("SYNC_LINK_TASKING ========7==done======= \n", task_count);
 		link_fsm = SYNC_LINK_START_TX;
 		err_count = 0;
+
+		if (task_count % 2000 == 0) {
+			sleep(5); //观察用
+		}
+
 		break;
 
 		case SYNC_LINK_STOP:
