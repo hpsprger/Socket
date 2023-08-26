@@ -1,7 +1,11 @@
 #ifndef __DATA_TRANS_H__
 #define __DATA_TRANS_H__
 
+#include <time.h>
 #include "phy_eth_common.h"
+
+#define NORMAL_PRINTF  //printf
+#define ERROR_PRRINT   printf
 
 enum DEVICE_TYPE {
 	DEVICE_TYPE_TCP_SERVER = 0,
