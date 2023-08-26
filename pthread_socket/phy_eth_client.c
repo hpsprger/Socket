@@ -2,7 +2,7 @@
 
 socket_device client_dev = {0};
 
-void client_init(void);
+int client_init(void);
 int client_send_single_message(link_msg *pmsg);
 int client_recv_single_message(link_msg *pmsg, unsigned int timeout);
 int client_get_socket_info(unsigned int type, void *info);
@@ -109,7 +109,7 @@ void *client_entry()
 	}
 }
 
-void client_init(void)
+int client_init(void)
 {
 	pthread_t tid;
 
@@ -120,7 +120,7 @@ void client_init(void)
 	if(pthread_create(&tid , NULL , client_entry, 0) == -1)
 	{
 		perror("client_entry pthread create error.\n");
-		exit(1);
+		return -1;
 	}
-
+	return 0;
 }

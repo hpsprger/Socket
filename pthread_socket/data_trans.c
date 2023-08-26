@@ -212,7 +212,8 @@ void * sync_fsm_translation()
 
 int data_trans_init(unsigned int type)
 {
-	
+	int ret;
+
 	if (type > DEVICE_TYPE_MAX) {
 		return -1;
 	}
@@ -220,6 +221,13 @@ int data_trans_init(unsigned int type)
 	srand((unsigned)time(NULL)); //保证随机数的随机性
 
 	data_trans.ops  = data_trans_dev_ops[type];
+
+	ret = data_trans.ops->init();
+	if(ret < 0)
+	{
+		perror("init failed.\n");
+		return -1;
+	}
 
 	if(pthread_create(&data_trans.tid , NULL , sync_fsm_translation, 0) == -1)
 	{

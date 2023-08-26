@@ -38,7 +38,7 @@ typedef struct _socket_device {
 } socket_device;
 
 typedef struct _device_ops {
-	void (*init)(void);
+	int (*init)(void);
 	int  (*send)(link_msg *pmsg);
 	int  (*recv)(link_msg *pmsg, unsigned int timeout);
 	int  (*get)(unsigned int type, void *info);
@@ -74,8 +74,8 @@ enum MSG_TYPE {
 };
 
 enum LINK_STATUS {
-	SYNC_LINK_CONNECTED = 0,
-	SYNC_LINK_DISCONNECTED,
+	SYNC_LINK_DISCONNECTED = 0,
+	SYNC_LINK_CONNECTED,
 	SYNC_LINK_STATUS_MAX,
 };
 

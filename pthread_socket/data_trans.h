@@ -10,7 +10,7 @@ enum DEVICE_TYPE {
 };
 
 typedef struct _data_trans_device {
-	int tid;
+	pthread_t tid;
 	device_ops *ops;
 } data_trans_device;
 
