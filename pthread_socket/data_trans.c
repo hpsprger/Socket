@@ -191,8 +191,8 @@ void * sync_fsm_translation()
 		clock_gettime(0, &time);
 		sec = (unsigned long long int)time.tv_sec;
 		usec = (unsigned long long int)time.tv_usec;
-
-		printf("SYNC_LINK_TASKING =====7===delay:%d====task_count=%d(time:0x%lld)===== \n", delay, task_count++, sec*1000000 + usec/1000);
+		//printf("SYNC_LINK_TASKING =====7===delay:%d====task_count=%d(time:0x%lld)===== \n", delay, task_count++, sec*1000000 + usec/1000);
+		printf("SYNC_LINK_TASKING =====7===delay:%d===task_count=%d==time:sec:%lld--usec:%lld===== \n", delay, task_count++, sec, usec);
 		sleep(delay);
 		printf("SYNC_LINK_TASKING ========7==done======= \n", task_count);
 		link_fsm = SYNC_LINK_START_TX;
